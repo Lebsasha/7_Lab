@@ -2,21 +2,18 @@ package bsu.rfe.java.group10.lab7.Lebedevskiy.varC;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.awt.event.*;
+import java.io.*;
 import java.net.Socket;
 
 public class FindPanel extends JFrame {
     Client User;
     Socket SocketU;
     BufferedReader ReaderU;
-    PrintStream Write;
+    PrintWriter Write;
     JTextField Find;
     JComboBox<String> Results;
+    JButton OpenBttn;
 
     FindPanel(String Nm, UPassword Pass/*, Boolean InIsTrue*/) {
         super("Find for "+Nm);
@@ -27,49 +24,71 @@ public class FindPanel extends JFrame {
         try {
             SocketU = new Socket("127.0.0.1", 6666);
             ReaderU = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
-            Write = new PrintStream(SocketU.getOutputStream());
+            Write = new PrintWriter(SocketU.getOutputStream());
         } catch (IOException exception) {
             exception.printStackTrace();
         }
         Find = new JTextField();
         Find.setMaximumSize(new Dimension(getSize().width, Find.getMinimumSize().height));
         Results = new JComboBox<>();
-        Results.setEditable(false);//TODO
-        Results.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                if (Results.getItemCount() != 0) {
-                    setVisible(false);
-                    new ClientChat(SocketU, (String) ((JComboBox<String>) actionEvent.getSource()).getSelectedItem());
-                }
-            }
-        });
+        Results.setEditable(false);//TODO (NOT EDIT!!!) ?
+//        Results.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent actionEvent) {
+//                System.out.println(actionEvent.getActionCommand());
+//                if (Results.getItemCount() != 0) {
+////                    setVisible(false); //TODO
+//                    new ClientChat(SocketU, User, (String) ((JComboBox<String>) actionEvent.getSource()).getSelectedItem());
+//                }
+//            }
+//        });
         JButton FindBttn = new JButton("Find");
         FindBttn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 Write.println("<>^" + Find.getText());
-                String Line;
+                Write.flush();
                 Results.removeAll();
+                System.out.println("OK");
                 try {
-                    while ((Line = ReaderU.readLine()) != null) {
-                    String[] S = Line.split("/");
-                        Results.removeAllItems();
-                        for (String Names : S)
+                    String Line = ReaderU.readLine();
+                    String[] S = Line.split("-");
+                    Results.removeAllItems();
+                    for (String Names : S)
                         Results.addItem(Names);
-                    }
+                    System.out.println("OK");
                 }
                 catch(IOException e){
                     e.printStackTrace();
                 }
+                if (Results.getItemCount() == 0)
+                    JOptionPane.showMessageDialog(FindPanel.this, "Cannot find user");
                 Results.setSelectedIndex(0);
+                OpenBttn.setEnabled(true);
             }
         });
+        OpenBttn = new JButton("Open");
+        OpenBttn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                new ClientChat(SocketU, User, (String) Results.getSelectedItem());
+            }
+        });
+        OpenBttn.setEnabled(false);
         Box ContentBox = Box.createVerticalBox();
         ContentBox.add(Find);
         ContentBox.add(Results);
         ContentBox.add(FindBttn);
+        ContentBox.add(OpenBttn);
         getContentPane().add(ContentBox, BorderLayout.CENTER);
+        addWindowListener(new WindowAdapter() {
+                              @Override
+                              public void windowClosing(WindowEvent e) {
+                                  Write.println("Exit");
+                                  Write.flush();
+                                  super.windowClosing(e);
+                              }
+                          });
         setDefaultCloseOperation(EXIT_ON_CLOSE);//TODO
         setVisible(true);
     }
