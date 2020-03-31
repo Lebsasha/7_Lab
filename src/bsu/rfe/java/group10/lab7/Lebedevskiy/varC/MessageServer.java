@@ -1,16 +1,19 @@
 package bsu.rfe.java.group10.lab7.Lebedevskiy.varC;
 
 import javafx.util.Pair;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 public class MessageServer{
-    Vector<Pair<Client, ArrayList<String>>> ListClients/* = new Vector<>(5)*/;
+    final Vector<Pair<Client, ArrayList<String>>> ListClients = new Vector<>(ApproxNumberOfUsers);
+    static HashMap<String, Integer> CountMessages;
+    final static int ApproxNumberOfUsers = 5;
     ServerSocket ServerSckt;
     Thread ForConnect;
+    final Semaphore SemForList = new Semaphore(1);
 
     class WaiterForConnections implements Runnable{
         WaiterForConnections(){}
@@ -35,11 +38,11 @@ public class MessageServer{
         File Test = new File("src/bsu/rfe/java/group10/lab7/Lebedevskiy/varC/Client.txt");
             try {
                 ServerSckt = new ServerSocket(6666);
-                if (Test.exists()) {
+                if (Test.exists() && Test.length() > 0) {
 //                    BufferedReader Read = new BufferedReader(new FileReader(Test));
-                    DataInputStream Read = new DataInputStream(new FileInputStream(new File("src/bsu/rfe/java/group10/lab7/Lebedevskiy/varC/Client.txt")));
-                    String line;
-                    ListClients = new Vector<>(Read.readInt());
+                    DataInputStream Read = new DataInputStream(new FileInputStream(Test));
+//                    ListClients = new Vector<>(Read.readInt());
+                    ListClients.ensureCapacity(Read.readInt());
                     while (Read.available() > 0) {
 //                        Pair<Client, ArrayList<String>> p = new Pair<>(Client.Read(Read), null);
                         Client client = Client.Read(Read);
@@ -50,10 +53,6 @@ public class MessageServer{
                         }
                         ListClients.add(new Pair<>(client, l));
                     }
-                }
-                else
-                {
-                    ListClients = new Vector<>();
                 }
             }
             catch (IOException exception) {
@@ -67,6 +66,7 @@ public class MessageServer{
     {
         try {
             DataOutputStream Write = new DataOutputStream(new FileOutputStream("src/bsu/rfe/java/group10/lab7/Lebedevskiy/varC/Client.txt"));
+            System.out.println("Exiting and writing");
             Write.writeInt(ListClients.size());
             for (Pair<Client, ArrayList<String>> p : ListClients)
             {
@@ -77,6 +77,7 @@ public class MessageServer{
                     Write.writeUTF(s);
                 }
             }
+            System.out.println("Exiting and writing");
         }
         catch (IOException ex)
         {
@@ -90,8 +91,9 @@ public class MessageServer{
         Socket SocketU;
         BufferedReader Read;
         PrintWriter writer;
-        String Temp;
-        int Count;
+        String UserName;
+        String Request;
+        Integer Count;//Дописать имена, мап
 
         ClientHandler(Socket socketU)
         {
@@ -99,6 +101,7 @@ public class MessageServer{
             try {
                 Read = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
                 writer = new PrintWriter(SocketU.getOutputStream());
+                UserName = Read.readLine();
             }
             catch (IOException ex)
             {
@@ -110,16 +113,18 @@ public class MessageServer{
         @Override
         public void run() {
             try {
-                while ((Temp = Read.readLine()) != null) {
-                    System.out.println("read " + Temp);//TODO
-                    if (Temp.startsWith("<>^"))
+                while ((Request = Read.readLine()) != null) {
+                    SemForList.acquire();
+                    System.out.println("read " + Request);//TODO
+                    if (Request.startsWith("<>^"))
                     {
                         System.out.println("FIND");
 //                        System.out.println(Temp.substring(3));
+                        Request = Request.substring(3);
                         ArrayList<String> a = new ArrayList<>(2);
                         for (Pair<Client, ArrayList<String>> p : ListClients)
                         {
-                            if (p.getKey().getName().startsWith(Temp.substring(3)))
+                            if (p.getKey().getName().startsWith(Request))
                                 a.add(p.getKey().getName());
                         }
                         String Names = ""/*String.valueOf(a.size())*/;
@@ -128,21 +133,26 @@ public class MessageServer{
                             Names = Names.concat("-"+s);
                         }
                         if (Names.length() >= 2)
-                        Names = Names.substring(1);
+                            Names = Names.substring(1);
                         writer.println(Names);
                     }
-                    else if (Temp.startsWith("Ask"))
+                    else if (Request.startsWith("Ask"))
                     {
                         String Msg = "";
-                        if (Integer.parseInt(Temp.split("-")[2]) != Count) {
-                            String User = Temp.split("-")[0].substring(3);
-                            String Getter = Temp.split("-")[1];
+                        if (Integer.parseInt(Request.split("-")[2]) != Count || Count == 0) {
+                            String Getter = Request.split("-")[1].substring(3);
+//                            String Getter = Request.split("-")[1];
                             Count = 0;
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
-                                if (pr.getKey().getName().equals(User)) {
+                                if (pr.getKey().getName().equals(UserName)) {
                                     for (String s : pr.getValue()) {
-                                        if (s.startsWith(Getter) || s.startsWith(User)) {
-                                            Msg = Msg.concat(s+"\n");
+                                        if (s.startsWith(Getter)) {
+                                            if (s.charAt(Getter.length()+1) == '1')
+                                                Msg = Msg.concat(s.split("-")[2]+"\n");
+                                            else {
+                                                assert s.charAt(Getter.length()+1) == '0' : "Bad";
+                                                Msg = Msg.concat(Getter + ": " + s.split("-")[2]);
+                                            }
                                             ++Count;
                                         }
                                     }
@@ -160,34 +170,36 @@ public class MessageServer{
                         }
                         writer.println(Msg);
                     }
-                    else if (Temp.startsWith("MMM"))
+                    else if (Request.startsWith("MMM"))
                     {
-                        String[] AllInfo =  Temp.split("-");
+                        String[] AllInfo =  Request.split("-");
                         if(AllInfo.length >= 3) {
-                            String Sender = AllInfo[0].substring(3);
+//                            String Getter = AllInfo[0].substring(3);
                             String Getter = AllInfo[1];
                             String Msg = AllInfo[2];
                             Pair<Client, ArrayList<String>> p;
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
-                                if (pr.getKey().getName().equals(Sender)) {
-                                    pr.getValue().add(Msg);
+                                if (pr.getKey().getName().equals(UserName)) {
+                                    pr.getValue().add(Getter+"-1-"+Msg);//Я отправил?
                                     ++Count;
                                     continue;
                                 }
                                 if (pr.getKey().getName().equals(Getter)) {
-                                    pr.getValue().add(Msg);
+                                    pr.getValue().add(UserName+"-0-"+Msg);//Я отправил?
                                 }
                             }
                         }
+
                     }
-                    else if (Temp.equals("Exit"))
+                    else if (Request.equals("Exit"))
                     {
                         SrvExit();
                     }
                     writer.flush();//TODO
+                    SemForList.release();
                 }
             }
-            catch (IOException ex)
+            catch (IOException | InterruptedException ex)
             {
                 ex.printStackTrace();
             }

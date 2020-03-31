@@ -25,6 +25,7 @@ public class FindPanel extends JFrame {
             SocketU = new Socket("127.0.0.1", 6666);
             ReaderU = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
             Write = new PrintWriter(SocketU.getOutputStream());
+            Write.println(User);
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -86,6 +87,11 @@ public class FindPanel extends JFrame {
                               public void windowClosing(WindowEvent e) {
                                   Write.println("Exit");
                                   Write.flush();
+                                  try {
+                                      Thread.sleep(1000);
+                                  }
+                                  catch (InterruptedException ex)
+                                  {}
                                   super.windowClosing(e);
                               }
                           });

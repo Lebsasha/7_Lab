@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashMap;
 
 public class LogIn extends JFrame {
     JTextField UserF;
@@ -14,6 +15,7 @@ public class LogIn extends JFrame {
     LogIn()
     {
         super("Log in");
+        MessageServer.CountMessages = new HashMap<>(MessageServer.ApproxNumberOfUsers);
         setVisible(true);
         Toolkit kit = Toolkit.getDefaultToolkit();
         setLocation(kit.getScreenSize().width/2, kit.getScreenSize().height/2);

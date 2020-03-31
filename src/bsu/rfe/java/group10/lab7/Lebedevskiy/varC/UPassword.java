@@ -22,7 +22,7 @@ public class UPassword {
         int l;
         p.Password = new char[l = read.readInt()];
         for (int i = 0; i < l; i++) {
-            p.Password[i] = /*(char) ~*/read.readChar();
+            p.Password[i] = (char) ~read.readChar();
         }
         return p;
 //        UPassword P = new UPassword();
@@ -36,7 +36,7 @@ public class UPassword {
     public void Write (DataOutputStream write) throws IOException {
         write.writeInt(Password.length);
         for (char c: Password)
-        write.writeChar(/*~*/c);
+        write.writeChar((char)(~c));
     }
 
     @Override

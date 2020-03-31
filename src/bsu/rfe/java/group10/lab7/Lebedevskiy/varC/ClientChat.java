@@ -33,15 +33,17 @@ public class ClientChat extends JFrame {
         CountMsg = 0;
         Incoming = new JTextArea();
         JScrollPane ForIncoming = new JScrollPane(Incoming);
+        //ForIncoming.setMaximumSize(new Dimension(getSize().width, ForIncoming.getMinimumSize().height+55));
 //        ForIncoming.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 //        ForIncoming.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); TODO
         Outgoing = new JTextField();
+        Outgoing.setMaximumSize(new Dimension(getSize().width, Outgoing.getMinimumSize().height));
         SocketU = Sck;
         try {
             Read = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
             Write = new PrintWriter(SocketU.getOutputStream());
             Messages = new ArrayList<>(5);
-            Write.println("Ask"+User.getName()+"-"+Nm+"-"+CountMsg);
+            Write.println("Ask"+"-"+Nm+"-"+CountMsg);
             Write.flush();
             String Msg = Read.readLine();//TODO
             Incoming.setText(Msg);
@@ -54,7 +56,7 @@ public class ClientChat extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     PrintStream Write = new PrintStream(SocketU.getOutputStream());
-                    Write.println("MMM"+User.getName()+"-"+WithWhom+"-"+Outgoing.getText());
+                    Write.println("MMM"+"-"+WithWhom+"-"+Outgoing.getText());
                     Write.flush();
                 }
                 catch (IOException ex)
@@ -67,6 +69,7 @@ public class ClientChat extends JFrame {
 //            @Override
 //            public void windowClosing(WindowEvent e) {
 //                Write.println("Exit");
+//                Thread.sleep(5000);
 //                Write.flush();
 //                super.windowClosing(e);
 //            }
@@ -89,7 +92,7 @@ public class ClientChat extends JFrame {
             try {
                 while (!Thread.interrupted())
                 {
-                    Write.println("Ask"+User.getName()+"-"+WithWhom+"-"+CountMsg);
+                    Write.println("Ask"+"-"+WithWhom+"-"+CountMsg);
                     Write.flush();
                     Msg = Read.readLine();
                     if (!Msg.equals("")) {
