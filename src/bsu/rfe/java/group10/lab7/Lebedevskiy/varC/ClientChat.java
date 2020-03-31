@@ -58,6 +58,7 @@ public class ClientChat extends JFrame {
                     PrintStream Write = new PrintStream(SocketU.getOutputStream());
                     Write.println("MMM"+"-"+WithWhom+"-"+Outgoing.getText());
                     Write.flush();
+                    Outgoing.setText("");
                 }
                 catch (IOException ex)
                 {

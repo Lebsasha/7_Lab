@@ -142,7 +142,6 @@ public class MessageServer{
                         if (Integer.parseInt(Request.split("-")[2]) != Count || Count == 0) {
                             String Getter = Request.split("-")[1].substring(3);
 //                            String Getter = Request.split("-")[1];
-                            Count = 0;
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
                                 if (pr.getKey().getName().equals(UserName)) {
                                     for (String s : pr.getValue()) {
@@ -153,20 +152,11 @@ public class MessageServer{
                                                 assert s.charAt(Getter.length()+1) == '0' : "Bad";
                                                 Msg = Msg.concat(Getter + ": " + s.split("-")[2]);
                                             }
-                                            ++Count;
                                         }
                                     }
                                     break;
                                 }
                             }
-                            //Temporary TODO
-                            int Count1 = 0;
-                            for (int i = Msg.length() - 1; i >= 0; --i)
-                            {
-                                if (Msg.charAt(i) == '\n')
-                                    ++Count1;
-                            }
-                            assert Count == Count1 : "Bad";//TODO
                         }
                         writer.println(Msg);
                     }
@@ -188,8 +178,9 @@ public class MessageServer{
                                     pr.getValue().add(UserName+"-0-"+Msg);//Я отправил?
                                 }
                             }
+                            ++Count;
                         }
-
+                        else Help.cout("Error: bad MMM request");
                     }
                     else if (Request.equals("Exit"))
                     {
