@@ -20,6 +20,7 @@ public class ClientChat extends JFrame {
     BufferedReader Read;
     PrintWriter Write;
     ArrayList<String> Messages;
+    Thread t;
 
     ClientChat(Socket Sck, Client user, String Nm)
     {
@@ -34,10 +35,9 @@ public class ClientChat extends JFrame {
         Incoming = new JTextArea();
         JScrollPane ForIncoming = new JScrollPane(Incoming);
         //ForIncoming.setMaximumSize(new Dimension(getSize().width, ForIncoming.getMinimumSize().height+55));
-//        ForIncoming.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-//        ForIncoming.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); TODO
         Outgoing = new JTextField();
         Outgoing.setMaximumSize(new Dimension(getSize().width, Outgoing.getMinimumSize().height));
+        Outgoing.requestFocus();
         SocketU = Sck;
         try {
             Read = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
@@ -54,16 +54,9 @@ public class ClientChat extends JFrame {
         Send.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    PrintStream Write = new PrintStream(SocketU.getOutputStream());
-                    Write.println("MMM"+"-"+WithWhom+"-"+Outgoing.getText());
-                    Write.flush();
-                    Outgoing.setText("");
-                }
-                catch (IOException ex)
-                {
-                    ex.printStackTrace();
-                }
+                Write.println("MMM"+"-"+WithWhom+"-"+Outgoing.getText());
+                Write.flush();
+                Outgoing.setText("");
             }
         });
 //        addWindowListener(new WindowAdapter() {
@@ -80,9 +73,16 @@ public class ClientChat extends JFrame {
         Content.add(Outgoing);
         Content.add(Send);
         getContentPane().add(Content, BorderLayout.CENTER);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                    t.interrupt();
+                super.windowClosing(e);
+            }
+        });
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);//TODO
         setVisible(true);
-        Thread t = new Thread(new GetIncomingMessages());
+        t = new Thread(new GetIncomingMessages());
         t.start();
     }
     class GetIncomingMessages implements Runnable
@@ -96,7 +96,9 @@ public class ClientChat extends JFrame {
                     Write.println("Ask"+"-"+WithWhom+"-"+CountMsg);
                     Write.flush();
                     Msg = Read.readLine();
+                    Help.cout(Msg);
                     if (!Msg.equals("")) {
+                        Msg = Msg.replace('§', '\n');
                         Incoming.setText(Msg);
                         CountMsg = 0;
                         for (int i = Msg.length() - 1; i >= 0; --i)
@@ -108,9 +110,8 @@ public class ClientChat extends JFrame {
                     Thread.sleep(2000);
                 }
             }
-             catch (IOException | InterruptedException ex)
+             catch (IOException | InterruptedException ignored)
              {
-                 ex.printStackTrace();
              }
         }
     }

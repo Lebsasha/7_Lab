@@ -6,12 +6,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.HashMap;
 
 public class LogIn extends JFrame {
     JTextField UserF;
     JPasswordField PasswF;
     MessageServer Srv;
+
     LogIn()
     {
         super("Log in");
@@ -25,6 +29,7 @@ public class LogIn extends JFrame {
         JLabel UserL = new JLabel("Username", SwingConstants.CENTER);
         UserF = new JTextField();
         UserF.setMaximumSize(new Dimension(getSize().width, UserF.getMinimumSize().height));
+        UserF.requestFocus();
         JLabel PasswL = new JLabel("Password", SwingConstants.LEFT);
         PasswF = new JPasswordField();
         PasswF.setMaximumSize(new Dimension(getSize().width, PasswF.getMinimumSize().height));
@@ -33,7 +38,9 @@ public class LogIn extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (Srv.IsAClient(UserF.getText(), new UPassword(PasswF.getPassword()))) {
-                    setVisible(false);
+                    //setVisible(false);
+                    UserF.setText("");
+                    PasswF.setText("");
                     new FindPanel(UserF.getText(), new UPassword(PasswF.getPassword())/*, InIsTrue*/);
                 }
                 else
@@ -45,7 +52,9 @@ public class LogIn extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (Srv.addClient(UserF.getText(), new UPassword(PasswF.getPassword()))) {
-                    setVisible(false);
+                    //setVisible(false);
+                    UserF.setText("");
+                    PasswF.setText("");
                     new FindPanel(UserF.getText(), new UPassword(PasswF.getPassword())/*, InIsTrue*/);
                 }
                 else
@@ -120,7 +129,26 @@ public class LogIn extends JFrame {
 
             @Override
             public void windowClosing(WindowEvent e) {
+                Socket socket;
+                PrintWriter Write;
+                try {
+                    socket = new Socket("127.0.0.1", 6666);
+                    Write = new PrintWriter(socket.getOutputStream());
+                    Write.println("ExitClient");
+                Write.println("Exit");
+                Write.flush();
+                try {
+                    Thread.sleep(5000);
+                }
+                catch (InterruptedException ex)
+                {
+                    System.out.println("Hello");
+                }
                 System.out.println("windowClosing");
+                socket.close();
+                }
+                catch (IOException ignored)
+                {}
                 super.windowClosing(e);
             }
         });

@@ -25,12 +25,13 @@ public class FindPanel extends JFrame {
             SocketU = new Socket("127.0.0.1", 6666);
             ReaderU = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
             Write = new PrintWriter(SocketU.getOutputStream());
-            Write.println(User);
+            Write.println(User.getName());
         } catch (IOException exception) {
             exception.printStackTrace();
         }
         Find = new JTextField();
         Find.setMaximumSize(new Dimension(getSize().width, Find.getMinimumSize().height));
+        Find.requestFocus();
         Results = new JComboBox<>();
         Results.setEditable(false);//TODO (NOT EDIT!!!) ?
 //        Results.addActionListener(new ActionListener() {
@@ -72,7 +73,10 @@ public class FindPanel extends JFrame {
         OpenBttn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                if (!User.equals(Results.getSelectedItem()))
                 new ClientChat(SocketU, User, (String) Results.getSelectedItem());
+                else
+                    JOptionPane.showMessageDialog(FindPanel.this, "Cannot start dialog with youself");
             }
         });
         OpenBttn.setEnabled(false);
@@ -85,17 +89,22 @@ public class FindPanel extends JFrame {
         addWindowListener(new WindowAdapter() {
                               @Override
                               public void windowClosing(WindowEvent e) {
-                                  Write.println("Exit");
-                                  Write.flush();
-                                  try {
-                                      Thread.sleep(1000);
+//                                  Write.println("Exit");
+//                                  Write.flush();
+//                                  try {
+//                                      Thread.sleep(1000);
+//                                  }
+//                                  catch (InterruptedException ex)
+//                                  {}
+                                  try{
+                                  SocketU.close();
                                   }
-                                  catch (InterruptedException ex)
+                                  catch(IOException ignored)
                                   {}
                                   super.windowClosing(e);
                               }
                           });
-        setDefaultCloseOperation(EXIT_ON_CLOSE);//TODO
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);//TODO
         setVisible(true);
     }
 }

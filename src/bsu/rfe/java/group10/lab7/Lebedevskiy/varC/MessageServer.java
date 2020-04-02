@@ -93,7 +93,7 @@ public class MessageServer{
         PrintWriter writer;
         String UserName;
         String Request;
-        Integer Count;//Дописать имена, мап
+        Integer Count;
 
         ClientHandler(Socket socketU)
         {
@@ -102,6 +102,7 @@ public class MessageServer{
                 Read = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
                 writer = new PrintWriter(SocketU.getOutputStream());
                 UserName = Read.readLine();
+                Help.cout(UserName);
             }
             catch (IOException ex)
             {
@@ -139,18 +140,17 @@ public class MessageServer{
                     else if (Request.startsWith("Ask"))
                     {
                         String Msg = "";
-                        if (Integer.parseInt(Request.split("-")[2]) != Count || Count == 0) {
-                            String Getter = Request.split("-")[1].substring(3);
-//                            String Getter = Request.split("-")[1];
+                        if (Count == 0 || Integer.parseInt(Request.split("-")[2]) != Count) {
+                            Help.cout("Answer: ");
+                            String Getter = Request.split("-")[1];
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
                                 if (pr.getKey().getName().equals(UserName)) {
                                     for (String s : pr.getValue()) {
                                         if (s.startsWith(Getter)) {
                                             if (s.charAt(Getter.length()+1) == '1')
-                                                Msg = Msg.concat(s.split("-")[2]+"\n");
+                                                Msg = Msg.concat(s.split("-")[2]+"§");
                                             else {
-                                                assert s.charAt(Getter.length()+1) == '0' : "Bad";
-                                                Msg = Msg.concat(Getter + ": " + s.split("-")[2]);
+                                                Msg = Msg.concat(Getter + ": " + s.split("-")[2]+"§");
                                             }
                                         }
                                     }
@@ -158,6 +158,7 @@ public class MessageServer{
                                 }
                             }
                         }
+                        Help.cout(Msg+"1111111");
                         writer.println(Msg);
                     }
                     else if (Request.startsWith("MMM"))
@@ -167,11 +168,9 @@ public class MessageServer{
 //                            String Getter = AllInfo[0].substring(3);
                             String Getter = AllInfo[1];
                             String Msg = AllInfo[2];
-                            Pair<Client, ArrayList<String>> p;
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
                                 if (pr.getKey().getName().equals(UserName)) {
                                     pr.getValue().add(Getter+"-1-"+Msg);//Я отправил?
-                                    ++Count;
                                     continue;
                                 }
                                 if (pr.getKey().getName().equals(Getter)) {
