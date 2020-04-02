@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
@@ -39,9 +41,9 @@ public class LogIn extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 if (Srv.IsAClient(UserF.getText(), new UPassword(PasswF.getPassword()))) {
                     //setVisible(false);
+                    new FindPanel(UserF.getText(), new UPassword(PasswF.getPassword())/*, InIsTrue*/);
                     UserF.setText("");
                     PasswF.setText("");
-                    new FindPanel(UserF.getText(), new UPassword(PasswF.getPassword())/*, InIsTrue*/);
                 }
                 else
                     JOptionPane.showMessageDialog(LogIn.this, "Incorrect login or password", "Info", JOptionPane.ERROR_MESSAGE);
@@ -53,9 +55,9 @@ public class LogIn extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 if (Srv.addClient(UserF.getText(), new UPassword(PasswF.getPassword()))) {
                     //setVisible(false);
+                    new FindPanel(UserF.getText(), new UPassword(PasswF.getPassword())/*, InIsTrue*/);
                     UserF.setText("");
                     PasswF.setText("");
-                    new FindPanel(UserF.getText(), new UPassword(PasswF.getPassword())/*, InIsTrue*/);
                 }
                 else
                     JOptionPane.showMessageDialog(LogIn.this, "User already exist", "Info", JOptionPane.ERROR_MESSAGE);
@@ -131,25 +133,30 @@ public class LogIn extends JFrame {
             public void windowClosing(WindowEvent e) {
                 Socket socket;
                 PrintWriter Write;
+                BufferedReader Read;
                 try {
                     socket = new Socket("127.0.0.1", 6666);
+                    Read = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     Write = new PrintWriter(socket.getOutputStream());
                     Write.println("ExitClient");
-                Write.println("Exit");
-                Write.flush();
-                try {
-                    Thread.sleep(5000);
-                }
-                catch (InterruptedException ex)
-                {
-                    System.out.println("Hello");
-                }
-                System.out.println("windowClosing");
-                socket.close();
+                    Write.println("Exit");
+                    Write.flush();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+
+                        System.out.println("Hello");
+                    }
+                    System.out.println("windowClosing");
+                    if (Read.readLine().equals("finish")) {
+                        socket.close();
+                        super.windowClosing(e);
+                    }
+                    else
+                        Help.cout("Bad");
                 }
                 catch (IOException ignored)
                 {}
-                super.windowClosing(e);
             }
         });
 

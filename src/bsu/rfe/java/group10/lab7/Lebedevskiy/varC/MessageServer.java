@@ -13,6 +13,7 @@ public class MessageServer{
     final static int ApproxNumberOfUsers = 5;
     ServerSocket ServerSckt;
     Thread ForConnect;
+    ArrayList<ClientHandler> Online;
     final Semaphore SemForList = new Semaphore(1);
 
     class WaiterForConnections implements Runnable{
@@ -60,6 +61,7 @@ public class MessageServer{
         }
         ForConnect = new Thread(new MessageServer.WaiterForConnections());
         ForConnect.start();
+        Online = new ArrayList<>(3);
     }
 
     void SrvExit ()
@@ -93,7 +95,7 @@ public class MessageServer{
         PrintWriter writer;
         String UserName;
         String Request;
-        Integer Count;
+        HashMap<String, Integer> Count;
 
         ClientHandler(Socket socketU)
         {
@@ -108,7 +110,21 @@ public class MessageServer{
             {
                 ex.printStackTrace();
             }
-            Count = 0;
+            Online.add(this);
+            Count = new HashMap<>();
+            int counter=0;
+            for (Pair<Client, ArrayList<String>> pr : ListClients) {
+                if (pr.getKey().getName().equals(UserName)) {
+            for (Pair<Client, ArrayList<String>> Users : ListClients) {
+                for (String Message: pr.getValue()) {
+                    if (Message.startsWith(Users.getKey().getName()))
+                        ++counter;
+                }
+                Count.put(Users.getKey().getName(), counter);
+                counter=0;
+            }
+            break;
+            }}
         }
 
         @Override
@@ -116,7 +132,7 @@ public class MessageServer{
             try {
                 while ((Request = Read.readLine()) != null) {
                     SemForList.acquire();
-                    System.out.println("read " + Request);//TODO
+                    System.out.println("read " + Request);
                     if (Request.startsWith("<>^"))
                     {
                         System.out.println("FIND");
@@ -140,12 +156,13 @@ public class MessageServer{
                     else if (Request.startsWith("Ask"))
                     {
                         String Msg = "";
-                        if (Count == 0 || Integer.parseInt(Request.split("-")[2]) != Count) {
+                        String Getter = Request.split("-")[1];
+                        if (Count.get(Getter) !=  Integer.parseInt(Request.split("-")[2])) {
                             Help.cout("Answer: ");
-                            String Getter = Request.split("-")[1];
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
                                 if (pr.getKey().getName().equals(UserName)) {
                                     for (String s : pr.getValue()) {
+                                        Help.cout(s);
                                         if (s.startsWith(Getter)) {
                                             if (s.charAt(Getter.length()+1) == '1')
                                                 Msg = Msg.concat(s.split("-")[2]+"§");
@@ -165,7 +182,6 @@ public class MessageServer{
                     {
                         String[] AllInfo =  Request.split("-");
                         if(AllInfo.length >= 3) {
-//                            String Getter = AllInfo[0].substring(3);
                             String Getter = AllInfo[1];
                             String Msg = AllInfo[2];
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
@@ -177,15 +193,27 @@ public class MessageServer{
                                     pr.getValue().add(UserName+"-0-"+Msg);//Я отправил?
                                 }
                             }
-                            ++Count;
+                            for (ClientHandler s: Online)
+                            {
+                                if (s.getUserName().equals(Getter)) {
+                                    s.getCount().replace(UserName, s.getCount().get(UserName) + 1);
+                                    break;
+                                }
+                            }
+                            Count.replace(Getter, Count.get(Getter)+1);
                         }
                         else Help.cout("Error: bad MMM request");
+                    }
+                    else if (Request.startsWith("Offline"))
+                    {
+                        Online.remove(this);
                     }
                     else if (Request.equals("Exit"))
                     {
                         SrvExit();
+                        writer.println("finish");
                     }
-                    writer.flush();//TODO
+                    writer.flush();
                     SemForList.release();
                 }
             }
@@ -193,6 +221,13 @@ public class MessageServer{
             {
                 ex.printStackTrace();
             }
+        }
+
+        public String getUserName() {
+            return UserName;
+        }
+        public HashMap<String, Integer> getCount() {
+            return Count;
         }
     }
 

@@ -33,6 +33,7 @@ public class ClientChat extends JFrame {
         WithWhom = Nm;
         CountMsg = 0;
         Incoming = new JTextArea();
+        Incoming.setEditable(false);
         JScrollPane ForIncoming = new JScrollPane(Incoming);
         //ForIncoming.setMaximumSize(new Dimension(getSize().width, ForIncoming.getMinimumSize().height+55));
         Outgoing = new JTextField();

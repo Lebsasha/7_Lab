@@ -73,7 +73,7 @@ public class FindPanel extends JFrame {
         OpenBttn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (!User.equals(Results.getSelectedItem()))
+                if (!User.getName().equals(Results.getSelectedItem()))
                 new ClientChat(SocketU, User, (String) Results.getSelectedItem());
                 else
                     JOptionPane.showMessageDialog(FindPanel.this, "Cannot start dialog with youself");
@@ -97,6 +97,7 @@ public class FindPanel extends JFrame {
 //                                  catch (InterruptedException ex)
 //                                  {}
                                   try{
+                                      Write.println("Offline");
                                   SocketU.close();
                                   }
                                   catch(IOException ignored)
