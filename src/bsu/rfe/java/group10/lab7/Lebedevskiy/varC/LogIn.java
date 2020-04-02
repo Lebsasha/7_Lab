@@ -142,7 +142,7 @@ public class LogIn extends JFrame {
                     Write.println("Exit");
                     Write.flush();
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException ex) {
 
                         System.out.println("Hello");
@@ -165,6 +165,6 @@ public class LogIn extends JFrame {
     }
     public static void main (String[] a)
     {
-        JFrame Frm = new LogIn(); //TODO Remove Frm ?
+        new LogIn();
     }
 }
