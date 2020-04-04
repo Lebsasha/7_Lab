@@ -66,7 +66,7 @@ class MessageServer{
     {
         try {
             DataOutputStream Write = new DataOutputStream(new FileOutputStream("src/bsu/rfe/java/group10/lab7/Lebedevskiy/varC/Client.txt"));
-            System.out.println("Exiting and writing");
+            Help.cout("Exiting and writing 1");
             Write.writeInt(ListClients.size());
             for (Pair<Client, ArrayList<String>> p : ListClients)
             {
@@ -77,7 +77,7 @@ class MessageServer{
                     Write.writeUTF(s);
                 }
             }
-            System.out.println("Exiting and writing");
+            Help.cout("Exiting and writing is all");
         }
         catch (IOException ex)
         {
@@ -102,7 +102,6 @@ class MessageServer{
                 Read = new BufferedReader(new InputStreamReader(SocketU.getInputStream()));
                 writer = new PrintWriter(SocketU.getOutputStream());
                 UserName = Read.readLine();
-                Help.cout(UserName);
             }
             catch (IOException ex)
             {
@@ -130,11 +129,9 @@ class MessageServer{
             try {
                 while ((Request = Read.readLine()) != null) {
                     SemForList.acquire();
-                    System.out.println("read " + Request);
+                    Help.cout("read " + Request);
                     if (Request.startsWith("<>^"))
                     {
-                        System.out.println("FIND");
-//                        System.out.println(Temp.substring(3));
                         Request = Request.substring(3);
                         ArrayList<String> a = new ArrayList<>(2);
                         for (Pair<Client, ArrayList<String>> p : ListClients)
@@ -160,7 +157,6 @@ class MessageServer{
                             for (Pair<Client, ArrayList<String>> pr : ListClients) {
                                 if (pr.getKey().getName().equals(UserName)) {
                                     for (String s : pr.getValue()) {
-                                        Help.cout(s);
                                         if (s.startsWith(Getter)) {
                                             if (s.charAt(Getter.length()+1) == '1')
                                                 Msg = Msg.concat(s.split("-")[2]+"§");
@@ -200,7 +196,7 @@ class MessageServer{
                             }
                             Count.replace(Getter, Count.get(Getter)+1);
                         }
-                        else Help.cout("Error: bad MMM request");
+                        else Help.cout("Error: bad MMM request: "+Request);
                     }
                     else if (Request.startsWith("Offline"))
                     {

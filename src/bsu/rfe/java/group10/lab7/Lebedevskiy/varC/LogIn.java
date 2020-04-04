@@ -144,7 +144,7 @@ public class LogIn extends JFrame {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        System.out.println("Hello from InterruptedException");
+                        System.out.println("Hello from InterruptedException in exit");
                     }
                     System.out.println("windowClosing");
                     if (Read.readLine().equals("finish")) {
@@ -152,7 +152,7 @@ public class LogIn extends JFrame {
                         super.windowClosing(e);
                     }
                     else
-                        Help.cout("Bad");
+                        System.out.println("Bad");
                 }
                 catch (IOException ignored)
                 {}

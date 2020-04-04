@@ -37,7 +37,7 @@ class FindPanel extends JFrame {
 //        Results.addActionListener(new ActionListener() {
 //            @Override
 //            public void actionPerformed(ActionEvent actionEvent) {
-//                System.out.println(actionEvent.getActionCommand());
+//                Help.cout(actionEvent.getActionCommand());
 //                if (Results.getItemCount() != 0) {
 ////                    setVisible(false); //TODO Rework for click
 //                    new ClientChat(SocketU, User, (String) ((JComboBox<String>) actionEvent.getSource()).getSelectedItem());
@@ -51,14 +51,12 @@ class FindPanel extends JFrame {
                 Write.println("<>^" + Find.getText());
                 Write.flush();
                 Results.removeAll();
-                System.out.println("OK");
                 try {
                     String Line = ReaderU.readLine();
                     String[] S = Line.split("-");
                     Results.removeAllItems();
                     for (String Names : S)
                         Results.addItem(Names);
-                    System.out.println("OK");
                 }
                 catch(IOException e){
                     e.printStackTrace();

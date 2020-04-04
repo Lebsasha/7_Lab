@@ -33,7 +33,7 @@ public class UPassword {
 //        return P;
     }
 
-    public void Write (DataOutputStream write) throws IOException {
+    void Write(DataOutputStream write) throws IOException {
         write.writeInt(Password.length);
         for (char c: Password)
         write.writeChar((char)(~c));

@@ -1,8 +1,8 @@
 package bsu.rfe.java.group10.lab7.Lebedevskiy.varC;
 
-public class Help {
-    public static void cout(Object s)
+class Help {
+    static void cout(Object Some)
     {
-        System.out.println(s);
+        System.out.println(Some);
     }
 }
