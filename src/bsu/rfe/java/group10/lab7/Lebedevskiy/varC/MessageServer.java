@@ -7,14 +7,13 @@ import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
-public class MessageServer{
-    final Vector<Pair<Client, ArrayList<String>>> ListClients = new Vector<>(ApproxNumberOfUsers);
+class MessageServer{
+    private final Vector<Pair<Client, ArrayList<String>>> ListClients = new Vector<>(ApproxNumberOfUsers);
     static HashMap<String, Integer> CountMessages;
     final static int ApproxNumberOfUsers = 5;
-    ServerSocket ServerSckt;
-    Thread ForConnect;
-    ArrayList<ClientHandler> Online;
-    final Semaphore SemForList = new Semaphore(1);
+    private ServerSocket ServerSckt;
+    private ArrayList<ClientHandler> Online;
+    private final Semaphore SemForList = new Semaphore(1);
 
     class WaiterForConnections implements Runnable{
         WaiterForConnections(){}
@@ -23,7 +22,6 @@ public class MessageServer{
             try {
                 while (!Thread.interrupted()) {
                     Socket UserSocket = ServerSckt.accept();
-                    //TODO
                     Thread Handle = new Thread(new ClientHandler(UserSocket));
                     Handle.start();
                     //UserSocket.close();
@@ -59,12 +57,12 @@ public class MessageServer{
             catch (IOException exception) {
                 exception.printStackTrace();
         }
-        ForConnect = new Thread(new MessageServer.WaiterForConnections());
-        ForConnect.start();
+        Thread forConnect = new Thread(new WaiterForConnections());
+        forConnect.start();
         Online = new ArrayList<>(3);
     }
 
-    void SrvExit ()
+    private void SrvExit()
     {
         try {
             DataOutputStream Write = new DataOutputStream(new FileOutputStream("src/bsu/rfe/java/group10/lab7/Lebedevskiy/varC/Client.txt"));
@@ -223,15 +221,15 @@ public class MessageServer{
             }
         }
 
-        public String getUserName() {
+        String getUserName() {
             return UserName;
         }
-        public HashMap<String, Integer> getCount() {
+        HashMap<String, Integer> getCount() {
             return Count;
         }
     }
 
-    public boolean IsAClient(String text, UPassword uPassword) {
+    boolean IsAClient(String text, UPassword uPassword) {
         Client t = new Client(text, uPassword);
         for (Pair<Client, ArrayList<String>> p : ListClients)
         {
@@ -240,19 +238,10 @@ public class MessageServer{
                 return true;
             }
         }
-        return false;//TODO
+        return false;
     }
 
-    public boolean addClient(String text, UPassword uPassword) {
-//        try {
-//            if ((ListClients.containsKey(new Client(text, uPassword)))) {
-//                throw new Exception("addClient, (ListClients.containsKey(new Client(text, uPassword)))");
-//            }
-//        }
-//        catch (Exception ex)
-//        {
-//            ex.getMessage();
-//        } //TODO Remove!!!
+    boolean addClient(String text, UPassword uPassword) {
         for (Pair<Client, ArrayList<String>> p: ListClients) {
             if (p.getKey().getName().equals(text))
                 return false;

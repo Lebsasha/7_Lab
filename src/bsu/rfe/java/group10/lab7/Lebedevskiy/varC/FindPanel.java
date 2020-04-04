@@ -6,14 +6,14 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 
-public class FindPanel extends JFrame {
-    Client User;
-    Socket SocketU;
-    BufferedReader ReaderU;
-    PrintWriter Write;
-    JTextField Find;
-    JComboBox<String> Results;
-    JButton OpenBttn;
+class FindPanel extends JFrame {
+    private Client User;
+    private Socket SocketU;
+    private BufferedReader ReaderU;
+    private PrintWriter Write;
+    private JTextField Find;
+    private JComboBox<String> Results;
+    private JButton OpenBttn;
 
     FindPanel(String Nm, UPassword Pass/*, Boolean InIsTrue*/) {
         super("Find for "+Nm);
@@ -39,7 +39,7 @@ public class FindPanel extends JFrame {
 //            public void actionPerformed(ActionEvent actionEvent) {
 //                System.out.println(actionEvent.getActionCommand());
 //                if (Results.getItemCount() != 0) {
-////                    setVisible(false); //TODO
+////                    setVisible(false); //TODO Rework for click
 //                    new ClientChat(SocketU, User, (String) ((JComboBox<String>) actionEvent.getSource()).getSelectedItem());
 //                }
 //            }
@@ -76,7 +76,7 @@ public class FindPanel extends JFrame {
                 if (!User.getName().equals(Results.getSelectedItem()))
                 new ClientChat(SocketU, User, (String) Results.getSelectedItem());
                 else
-                    JOptionPane.showMessageDialog(FindPanel.this, "Cannot start dialog with youself");
+                    JOptionPane.showMessageDialog(FindPanel.this, "Cannot start dialog with yourself");
             }
         });
         OpenBttn.setEnabled(false);
@@ -89,13 +89,6 @@ public class FindPanel extends JFrame {
         addWindowListener(new WindowAdapter() {
                               @Override
                               public void windowClosing(WindowEvent e) {
-//                                  Write.println("Exit");
-//                                  Write.flush();
-//                                  try {
-//                                      Thread.sleep(1000);
-//                                  }
-//                                  catch (InterruptedException ex)
-//                                  {}
                                   try{
                                       Write.println("Offline");
                                   SocketU.close();
@@ -105,7 +98,7 @@ public class FindPanel extends JFrame {
                                   super.windowClosing(e);
                               }
                           });
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);//TODO
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setVisible(true);
     }
 }

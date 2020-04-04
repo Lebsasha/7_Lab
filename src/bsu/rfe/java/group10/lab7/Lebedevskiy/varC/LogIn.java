@@ -14,11 +14,11 @@ import java.net.Socket;
 import java.util.HashMap;
 
 public class LogIn extends JFrame {
-    JTextField UserF;
-    JPasswordField PasswF;
-    MessageServer Srv;
+    private JTextField UserF;
+    private JPasswordField PasswF;
+    private MessageServer Srv;
 
-    LogIn()
+    private LogIn()
     {
         super("Log in");
         MessageServer.CountMessages = new HashMap<>(MessageServer.ApproxNumberOfUsers);
@@ -144,8 +144,7 @@ public class LogIn extends JFrame {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-
-                        System.out.println("Hello");
+                        System.out.println("Hello from InterruptedException");
                     }
                     System.out.println("windowClosing");
                     if (Read.readLine().equals("finish")) {
