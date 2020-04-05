@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.HashMap;
 
 public class LogIn extends JFrame {
     private JTextField UserF;
@@ -21,7 +20,6 @@ public class LogIn extends JFrame {
     private LogIn()
     {
         super("Log in");
-        MessageServer.CountMessages = new HashMap<>(MessageServer.ApproxNumberOfUsers);
         setVisible(true);
         Toolkit kit = Toolkit.getDefaultToolkit();
         setLocation(kit.getScreenSize().width/2, kit.getScreenSize().height/2);
@@ -141,13 +139,14 @@ public class LogIn extends JFrame {
                     Write.println("ExitClient");
                     Write.println("Exit");
                     Write.flush();
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        System.out.println("Hello from InterruptedException in exit");
-                    }
-                    System.out.println("windowClosing");
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException ex) {
+//                        System.out.println("Hello from InterruptedException in exit");
+//                    }
+                    Help.cout("windowClosing");
                     if (Read.readLine().equals("finish")) {
+                        System.out.println("Good exit");
                         socket.close();
                         super.windowClosing(e);
                     }

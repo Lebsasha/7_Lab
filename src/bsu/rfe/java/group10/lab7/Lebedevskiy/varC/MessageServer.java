@@ -8,12 +8,11 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 
 class MessageServer{
+    private final static int ApproxNumberOfUsers = 5;
+    private final static Semaphore SemForListAndOnline = new Semaphore(1);
     private final Vector<Pair<Client, ArrayList<String>>> ListClients = new Vector<>(ApproxNumberOfUsers);
-    static HashMap<String, Integer> CountMessages;
-    final static int ApproxNumberOfUsers = 5;
     private ServerSocket ServerSckt;
     private ArrayList<ClientHandler> Online;
-    private final Semaphore SemForList = new Semaphore(1);
 
     class WaiterForConnections implements Runnable{
         WaiterForConnections(){}
@@ -107,7 +106,9 @@ class MessageServer{
             {
                 ex.printStackTrace();
             }
-            Online.add(this);
+            try {
+                SemForListAndOnline.acquire();
+                Online.add(this);
             Count = new HashMap<>();
             int counter=0;
             for (Pair<Client, ArrayList<String>> pr : ListClients) {
@@ -122,13 +123,17 @@ class MessageServer{
             }
             break;
             }}
+                SemForListAndOnline.release();
+            }
+            catch (InterruptedException ignored)
+            {}
         }
 
         @Override
         public void run() {
             try {
                 while ((Request = Read.readLine()) != null) {
-                    SemForList.acquire();
+                    SemForListAndOnline.acquire();
                     Help.cout("read " + Request);
                     if (Request.startsWith("<>^"))
                     {
@@ -189,8 +194,14 @@ class MessageServer{
                             }
                             for (ClientHandler s: Online)
                             {
+                                Help.cout(s.getUserName());
                                 if (s.getUserName().equals(Getter)) {
-                                    s.getCount().replace(UserName, s.getCount().get(UserName) + 1);
+                                    if (
+                                    s.getCount().replace(UserName, s.getCount().get(UserName) + 1)==null)
+                                    {
+                                        Help.cout(s.getUserName());
+                                        s.getCount().put(UserName, 1);
+                                    }
                                     break;
                                 }
                             }
@@ -208,7 +219,7 @@ class MessageServer{
                         writer.println("finish");
                     }
                     writer.flush();
-                    SemForList.release();
+                    SemForListAndOnline.release();
                 }
             }
             catch (IOException | InterruptedException ex)
